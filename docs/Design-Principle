@@ -1,0 +1,17 @@
+## Responsive principle
+- A responsive system could offer periodic updates during your wait, informing you
+of your position in the queue or even estimating how much longer you’ll need to waiting for.
+- So you can make an decision about whether to continue waiting or take a different action.
+
+## Resilient principle
+- The principle of resiliency is about how well a system can handle failure, recover from it, and
+continue to function.
+
+## Elastic principle
+- Elasticity refers to the system’s capacity to dynamically adjust its resources in response to 
+fluctuations in demand or workload. This feature ensures that the system scales its resources up or 
+down as required, thereby maintaining optimal performance and user experience, while also minimizing costs.
+- Essentially, it allows for paying only for the resources needed at any given moment, rather than constantly paying for peak-time resources.
+
+## Message-driven principle
+- Asynchronous and non-blocking communication.

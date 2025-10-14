@@ -1,0 +1,386 @@
+## Kotlin Api
+1. Operator Overloading
+- https://kotlinlang.org/docs/operator-overloading.html
+
+
+################################################
+## Creational Pattern
+1. Singleton
+- Use “object” key word
+2. Factory Method
+	fun createPiece(notation: String): ChessPiece {
+ 		val (type, file, rank) = notation.toCharArray()
+ 		return when (type) {
+ 			'q' -> Queen(file, rank)
+ 			'p' -> Pawn(file, rank)
+ 			// ...
+ 			else -> throw IllegalArgumentException("Unknown piece: $type")
+ 		}
+	}
+- Statis Factory Method
+	Long l1 = new Long("1"); // Using constructor
+	Long l2 = Long.valueOf("1"); // Using static factory method
+
+3. Abstract Factory
+	interface Parser {
+ 		fun property(prop: String): Property
+ 		fun server(propertyStrings: List<String>): ServerConfiguration
+ 	}
+ 	class YamlParser : Parser {
+ 		// Implementation specific to YAML files
+	}
+	class JsonParser : Parser {
+ 		// Implementation specific to JSON files
+	}
+
+4. Builder
+- Data class is the alternative of traditional builder
+	data class MailDefaults(
+		val to: List<String>,
+		val cc: List<String> = listOf(),
+		val title: String = "",
+		val message: String = "",
+		val important: Boolean = false,
+	)
+
+5. Prototype
+- For supporting the creation of objects that are similar
+but have slight variations
+- Use .copy() function for it
+	user.copy(name = userName) // same user data, only name different
+
+
+################################################
+## Structural Patterns
+1. Decorator
+- During the decorator’s call, can decide whether to alter the behavior of the wrapped object
+or delegate the call
+	class LoggingStarTrekRepository(private val repository: StarTrekRepository): StarTrekRepository {
+		override fun getCaptain(starshipName: String): String {
+	 		println("Getting captain for $starshipName")
+	 		return repository.getCaptain(starshipName)
+	 	}
+	}
+
+2. Adapter
+- The Adapter design pattern aims to convert one interface into another. By creating adapters that convert one interface to another, we can bridge the gap between the different interfaces and make them compatible.
+	fun USPlug.toEUPlug(): EUPlug {
+	 	val hasPower = if (this.hasPower == 1) "YES" else "NO" // Type Int to Type String
+	 	return object : EUPlug {
+	 		override val hasPower = hasPower	
+	 	}
+	}
+
+3. Bridge
+- Bridge pattern helps us decouple different parts of a system by using interfaces, and implementations.
+- Adding new dependency into constructor to handle part of a business logic, instead of adding new func into the interface Trooper and handle it inside StormTrooper.
+	data class StormTrooper(
+	 	private val weapon: Weapon,
+	 	private val legs: Legs
+	) : Trooper {
+		override fun move(x: Long, y: Long) {
+			legs.move(x, y)
+	 	}
+		
+		override fun attackRebel(x: Long, y: Long) {
+	 		weapon.attack(x, y)
+	 	}
+	}
+
+
+4. Composite
+- This pattern empowers us to support a tree-like structure of diverse complexity, allowing
+us to execute operations on all nodes within it.
+	class Squad(private val units: List<Trooper>): Trooper {
+	 	override fun move(x: Long, y: Long) {
+	 		for (u in units) {
+				u.move(x, y)
+			}
+	 	}
+	 	override fun attackRebel(x: Long, y: Long) {
+	 		...
+	 	}
+	 	override fun retreat() {
+	 		...
+	 	}
+	}
+- Nested Composite
+	class Squad(private val units: List<Squad>)
+
+5. Facade
+- Facade like a helpers that hide the complex inner workings of an implementation. The goal is to make a complex group of classes easy to use.
+- The Facade design pattern itself aims to offer a more user-friendly and straightforward way of working with a group of related classes or interfaces.
+	fun Server.startFromConfiguration(fileLocation: String) {
+	 	val path = Path(fileLocation)
+	 	val lines = path.toFile().readLines()
+	 	val configuration = try {
+	 		JsonParser().server(lines) 	// Try First Parser
+	 	} catch (e: RuntimeException) {
+	 		YamlParser().server(lines) 	// Try Second Parser
+	 		// More code may come here 	// Try more Parser
+	 	}
+	 	
+	 	Server.withPort(configuration.port)
+	}
+
+6. Flyweight
+- Flyweight is a term used to describe a situation where we have multiple classes using the same resource object. Rather than create new resource for all classes, we will only create one and share among them all.
+- E.g: Like icon on Feeds, can create one for first feed and the share it with orther feeds.
+	object SnailSprites {
+		val sprites = List(8) { i ->
+	 		java.io.File(when (i) {
+	 			0 -> "snail-left.jpg"
+	 			1 -> "snail-right.jpg"
+	 			in 2..4 -> "snail-move-left-${i-1}.jpg"
+	 			else -> "snail-move-right${(4-i)}.jpg"
+	 		})
+	 	}
+	}
+	class TansanianSnail() {
+	 	val directionFacing = Direction.LEFT
+	 	val sprites = SnailSprites.sprites // sprites is share for all classes
+	}
+
+7. Proxy
+- Only init resource once at initial request, subsequence request will use cache resource
+- With Kotlin can use keyword "by lazy" for memory cache
+
+
+################################################
+## Behavioral Patterns
+1. Strategy
+- The Strategy pattern is incredibly useful when your application needs to change how it behaves
+while it’s running.
+	object Weapons {
+		fun peashooter(x: Int, y: Int, direction: Direction): Projectile {
+	 		return Projectile(x, y, direction)
+	 	}
+
+		fun banana(x: Int, y: Int, direction: Direction): Projectile {
+			return Projectile(x, y, direction)
+		}
+	} 
+	
+	var currentWeapon = Weapons::peashooter // A variable is a function, can change in runtime
+	val shoot = fun() {
+	 	currentWeapon(x, y, direction)
+	}
+
+2. Iterator
+	class Squad(private val units: List<Trooper>) : Trooper() {
+		constructor(vararg units: Trooper) : this(units.toList())
+	}
+	val platoon = Squad(
+	 	Trooper(),
+	 	Squad(
+	 		Trooper(),
+	 	),
+	 	Trooper(),
+	 	Squad(
+	 		Trooper(),
+	 		Trooper(),
+		),
+		Trooper()
+	)
+	// How to loop trooper like Iterator??
+	for (trooper in platoon) {
+	 	println(trooper)
+	}
+	// Need to implement iterator operator
+	class Squad(private val units: List<Trooper>) : Trooper() {
+	    constructor(vararg units: Trooper) : this(units.toList())
+
+	    operator fun iterator() = object: Iterator<Trooper> {
+	        private var i = 0
+	        override fun hasNext(): Boolean = i < units.size
+	        override fun next(): Trooper = units[i++]
+	    }
+	}
+
+3. State
+	sealed interface Mood {}
+	data object Still : Mood
+	data object Aggressive : Mood
+	data object Retreating : Mood
+	data object Dead : Mood
+
+4. Command
+	// [Origin] use interface
+	interface Command {
+		fun execute()
+	}
+	// [New] use function
+	typealias Command = () -> Unit
+	val moveGenerator = fun(trooper: Trooper, x: Long, y: Long): Command {
+	 	return fun() {
+	 		trooper.move(x, y)
+	 	}
+	}
+
+5. Chain of Responsibility
+- This is just about Interface vs Function, 
+	typealias Handler = (request: Request) -> Response
+	val authentication = fun(next: Handler) = 
+		fun(request: Request): Response {
+			require(request.isKnownEmail()) { "Unknown email address" }
+			return next(request)
+		}
+	val req = Request("developer@company.com", "Why do we need Software Architects?")
+	val chain = basicValidation(authentication(finalResponse()))
+	val res = chain(req)
+	println(res)
+
+6. Interpreter
+- DSL term: domain specific languagues
+- Last argument is a function, can place it outside of parentheses
+- "from: SelectClause.() -> Unit", with "from" is an extension function of "SelectClause"
+	fun select(vararg columns: String, from: SelectClause.() -> Unit): SelectClause {
+		....
+	}
+
+7. Mediator
+- All objects communicate to Mediator, reduce dependency between objects, rather than objects
+having knowledge of many peers, they only need to be acquainted with one entity: the Mediator.
+- Caveats: There’s a risk of Mediator turning into a God Object
+- Example: ProductManager play Mediator role here, he manage Kenny & Brad
+	object Michael : ProductManager {
+	 	private val kenny = Kenny(this)
+	 	private val brad = Brad(this)
+	 	
+	 	override fun isAllGood(majorRelease: Boolean): Boolean {
+	 		if (!kenny.isEating() && !kenny.isSleeping()) {
+	 			println(kenny.doesMyCodeWork())
+	 		} else if (!brad.isEating() && !brad.isSleeping()) {
+	 			println(brad.doesMyCodeWork())
+	 		}
+	 		return true
+	 	}
+	}
+	class MyCompany(private val manager: ProductManager) {
+	 	fun taskCompleted(isMajorRelease: Boolean) {
+	 		println(manager.isAllGood(isMajorRelease))
+	 	}
+	}
+
+8. Memento
+- Support to revert to a prior state is necessary.
+- Example: "Michael" thought will be reverted back to "Should get some coffee".
+	class Manager {
+		private var thoughts = mutableListOf<String>()
+
+		fun saveThatThought(): Memory = Memory(thoughts.toList())
+
+		fun recall(memory: Memory) {
+		 	memory.restore()
+		}
+
+		inner class Memory(private val mindState: List<String>) {
+			fun restore() {
+				thoughts = mindState.toMutableList()
+			}
+		}
+	}
+	fun main() {
+		val michael = Manager().apply {
+			michael.think("Need to implement Coconut Cannon")
+			michael.think("Should get some coffee")
+		}
+		val memento = michael.saveThatThought()
+		with (michael) {
+			michael.think("Or maybe tea?")
+			michael.think("No, actually, let's implement Pineapple Launcher")
+		}
+		michael.recall(memento)
+	}
+
+9. Visitor
+- This design pattern good fit in Crawler example:
+	sealed class HtmlElement
+	data object Image : HtmlElement() {
+	 	val src: String
+	 		get() = "https://some.image"
+	}
+	data object Link : HtmlElement() {
+	 	val href: String
+	 		get() = "https://some.link"
+	}
+	data object Table : HtmlElement()
+	class Container(val elements: MutableList<HtmlElement> = mutableListOf()): HtmlElement() {
+	 	constructor(vararg units: HtmlElement) : this(mutableListOf()) {
+	 		for (u in units) {
+	 			this.elements.add(u)
+	 		}
+	 	}
+	}
+	class LinksCrawler {
+ 		private var _links = mutableListOf<String>()
+ 		val links
+ 			get()= _links.toList()
+
+ 		fun visit(page: Page) = visit(page.elements)
+ 		
+ 		fun visit(container: Container) = visit(container.elements)
+
+ 		fun visit(elements: List<HtmlElement>) {
+ 			for (e in elements) {
+ 				when (e) {
+ 					is Container -> e.accept(this)
+ 					is Link -> _links.add(e.href)
+ 					is Image -> _links.add(e.src)
+ 					else -> {}
+ 				}
+ 			}
+ 		}
+	}
+	// Extension function for "accept"
+	private fun Container.accept(feature: LinksCrawler) = feature.visit(this)
+	private fun Page.accept(feature: LinksCrawler) = feature.visit(this)
+
+	// Main function is here
+	fun collectLinks(page: Page): List<String> {
+		// No need for intermediate variable there
+		return LinksCrawler().run {
+		 	page.accept(this)
+		 	this.links
+		}
+	}
+ 
+
+10. Template Method
+- Can define function inside another function, in kotlin it call "local function".
+- Local functions can only be accessed by the parent function they were declared in and are a great way to extract common logic without the need to expose it.
+	fun runSchedule(...) {
+	 	fun arriveToWork() {
+	 		println("How are you all?")
+	 	}
+	 	val drinkCoffee = { println("Did someone left the milk out?") }
+	 	fun goToLunch() = println("I would like something Italian")
+	 	val goHome = fun () {
+	 		println("Finally some rest")
+	 	}
+	}
+	
+
+11. Observer
+- Subscriber & publisher
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,148 @@
+## Kotlin Coroutine
+- CountDownLatch
+- Executors.newFixedThreadPool
+- ForkJoinPool(4).asCoroutineDispatcher()
+	+ val forkJoinPool = ForkJoinPool(4).asCoroutineDispatcher()
+	+ forkJoinPool.close() // Must do to release resource
+- SelectUnbiased
+	+ Await multiple suspending functions simultaneously and select the first one that becomes available. If two events happen simultaneously, it will select the first one.
+	+ Can also select and then send to other channel
+	val firstOption = producerOne()
+    val secondOption = producerTwo()
+    val movieToWatch = selectUnbiased {
+        firstOption.onReceive { it }
+        secondOption.onReceive { it }
+    }
+    println(movieToWatch) // Print which produce come first
+- Mutex
+	+ Also known as mutual exclusion, similar to asynchonously, it serves as a way to safeguard a shared state that might
+be accessed by multiple coroutines simultaneously.
+	+ In Java it will lock the thread until the lock is acquired. In Kotlin, however, a Mutex suspends the coroutine instead.
+	val mutex = Mutex()
+	mutex.withLock() { ... }
+
+## Channel
+- To talk and recieve data between multiple coroutines, this model also know as Communicating Sequential Processes.
+- Channels in Kotlin are quite similar to Java’s BlockingQueue, but Channels suspend a coroutine rather than blocking a thread, making it a more efficient.
+
+## Producer
+- Similar as channel but when you simply want to send data from one coroutine only.
+- For Producer, it produce launches coroutine and returns a channel, and the "send" func implicit inside producer.
+- For lifecycle, we control when to close or cancel for Channel, but Producer will handle by it own.
+
+## Actors
+- Just like produce(), the actor() function in Kotlin is another way to create a coroutine that’s tied to a channel.
+- The key difference is that, with actor(), the channel goes into the coroutine, not out of it.
+- With Actor, the channel and coroutine are encapsulated within a single entity, simplifying the architecture and use.
+	val actor = actor<Int> {
+	 	channel.consumeEach {
+	 		println(it)
+	 	}
+	}
+	(1..10).forEach {
+	 	actor.send(it)
+	}
+
+## Buffered channels
+- By defualt it is unbuffered channel, that mean the capacity is just one single element.
+- With buffering enabled, the producer no longer waits for the consumer; it sends messages as
+quickly as it can, while the consumer continues to process them at its own speed.
+- We should use buffered channel judiciously, because increasing the channel’s capacity also increases its memory footprint.
+	val actor = actor<Long>(capacity = 10) {
+	 	...
+	}
+
+## Volatile (for variable) & @Synchronized (for function)
+- The volatile keyword signals that a variable is subject to concurrent access and modification
+by multiple threads.
+- When a variable is marked as volatile, it ensures that every read and write operation on that variable 
+happens directly in the main memory. Which guarantees immediate visibility of the variable’s changes to all threads.
+- Thereby enhancing its thread safety by ensuring that threads always access the most current state of the
+variable.
+
+## Pure Function
+- A pure function should return the same result for the same input.
+- And a pure function is one that has no side effects.
+	+ In this context, a side effect refers to any action that modifies or accesses the external state
+	+ The external state could be a non-local variable included Closeure
+
+## Closures
+- The caching of state ("i") is store inside the function
+	fun counter(): () -> Int {
+	 	var i = 0
+	 	return { i++ }
+	}
+	val next = counter()
+	println(next())
+	println(next())
+
+## tailrec (Tail Recursion)
+- Need to avoid stackoverflow when using recursion, Kotlin supports an optimization called tail recursion.
+Kotlin compiler sees a tailrec function, it transforms the recursive calls into a loop during compilation.
+- Only support single recursion.
+	tailrec fun sumRec(i: Int, sum: Long, numbers: List<Int>): Long {
+	 	return if (i == numbers.size) {
+	 		return sum
+	 	} else {
+	 		sumRec(i+1, numbers[i] + sum, numbers)
+	 	}
+	}
+
+## Currying
+- Currying is a technique that transforms a function accepting multiple arguments into a sequence
+of functions, each taking just one argument.
+	fun subtract(x: Int, y: Int): Int {
+	 	return x - y
+	}
+	fun subtract(x: Int): (Int) -> Int {
+	 	return fun(y: Int): Int {
+	 		return x - y
+	 	}
+	}
+	fun subtract(x: Int) = { y: Int -> x - y }
+	println(subtract(50)(8)) // 42
+
+## Memoization
+- If our function always returns the same output for the same input, we can easily map its input to 
+the output, caching the results in the process and avoid recomputation.
+
+
+##### Kotlin Flow #####
+## Flows
+- A Flow in Kotlin is a cold, asynchronous stream that implements the Observable design pattern.
+
+## Buffering Flow
+- With buffering enabled, the flow emits values without waiting for the consumer to catch up.
+On the consumer side, it still has the flexibility to collect the values at its own speed.
+- Note: it is different for ShareFlow, it will wait for consumer to complete operation before emit next value.
+
+## Flow sharing
+- In Kotlin, Flow sharing is an important concept for optimizing resource usage and coordinating
+multiple consumers that want to read from the same flow of data.
+- By default, flows in Kotlin are “cold,” meaning each subscriber initiates its own separate collection of the flow, causing the flow
+to be collected multiple times from the beginning.
+- However, there are cases where you might want multiple collectors to share a single subscription to a flow, we can use:
+	## ShareIn
+	- The shareIn() function is the recommended way to share flows in Kotlin as of version 1.6. This function converts a 
+	cold flow into a hot flow, allowing multiple subscribers to share emitted values. It runs the upstream flow in a 
+	separate coroutine and rebroadcasts its emissions to downstream subscribers.
+	## StateIn
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+	
