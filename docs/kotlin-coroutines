@@ -1,0 +1,164 @@
+#################################################################################################
+## Kotlin Coroutines & Flow
+
+Coroutines in the context of Kotlin
+	- Coroutine is a concurrent programming primitive that enable you to suspend and resume the excution at certain points without blocking a thread.
+	- In Kotlinm coroutines are implemented as lightweight threads build on top of regular thread but they are much more efficient and flexible.
+	- Under the hood, Kotlin compiles suspending-function into state machines, when we call suspend function it captures the current execution state, when the result is ready it resumes execution at the saved point.
+	- And additional thing, Coroutine can suspend the exection a thread and resume it in another thread.
+
+Suspend function
+	- Suspend function is designed to be used with coroutines, they can be paused and resumed without blocking the underlying thread which makes our asynchronous code more efficient.
+
+CoroutineScope: 
+	- Control the lifetime of coroutines through its job. When we cancel the job of a scope, it cancels all coroutines started in that scope. In Android, we can use a scope to cancel all running coroutines when user navigates away from an Activity or Fragment.
+
+Channel
+	- To talk & recieve data between multiple coroutines, this model also know as Communicating Sequential Processes.
+	- Channels in Kotlin are quite similar to Java’s BlockingQueue, but Channels suspend a coroutine rather than blocking a thread, so that is more efficient.
+
+Producer
+	- For Producer, it produce launches coroutine and returns a channel, and the "send" func implicit inside producer.
+	- Similar as channel but when we simply want to send data from one coroutine only.
+	- For lifecycle, we control when to close or cancel for Channel, but Producer will handle by it own.
+
+Actors
+	- Just like Producer, the Actor function in Kotlin is another way to create a coroutine that’s tied to a channel.
+	- The key difference is that, with Actor, the channel goes into the coroutine, not out of it.
+	- With Actor, the channel and coroutine are encapsulated within a single entity, simplifying the architecture and use.
+		val actor = actor<Int> {
+		 	channel.consumeEach {
+		 		println(it)
+		 	}
+		}
+		(1..10).forEach {
+		 	actor.send(it)
+		}
+
+Buffered channels
+	- By defualt it is unbuffered channel, that mean the capacity is just one single element.
+	- With buffering enabled, the producer no longer waits for the consumer. it sends messages as quickly as it can, while the consumer continues to process them at its own speed.
+	- We should use buffered channel judiciously, because increasing the channel’s capacity also increases memory.
+
+Flow
+	- A flow represents a cold stream of values, the code block of the flow is not active so no resources are bound to it yet. The terminal of a Flow only activating for the duration of the corresponding operation. It is not active before the operation, and after the operation it will release all resources before returning from the call. So it makes the flow cold.
+	- Similar idea as Cold Observable and Hot Observable
+		+ Hot flow only create one producer and all subscribers will get the value from it
+		+ Cold flow will create the producer for each subscriber, so new subscriber will collect all the values of the flow.
+	- Example:
+		+ fun foo(p: Params): Flow<Value> = flow { while (hasMore) emit(nextValue) }
+		+ Caller of foo gets a reference to the flow instance, but the code inside flow { ... } builder is not active
+	+ Note:
+		- Terminal operators on a flow collect all values emitted by the flow.
+		- Flow is asynchronous and allows suspending functions anywhere in its builder and operators.
+
+CallbackFlow
+	- For solving the callback situation, that is when we call a function within coroutine but the function is not return a result directly. Instead, the result is returned via a callback. So CallbackFlow will be suitable in this case.
+	- CallbackFlow is result as a Flow, and that flow is cold as well. Which means the code block is only active during the duration of the corresponding operation.
+	- CallbackFlow allows elements to be produced by code that is running in a different context.
+
+Coroutine-Context and Dispatchers
+	- Coroutine Context
+		+ Coroutines always execute in a context represented by a value of the CoroutineContext.
+		+ The Coroutine-Context is a set of various elements. The main element is the Job of the coroutine.
+	- Dispatcher
+		+ The coroutine context includes a coroutine dispatcher that determines what thread uses for its execution.
+		+ The coroutine dispatcher can confine coroutine execution to a specific thread, dispatch it to a thread pool, or let it run unconfined.
+
+Job type:
+	- Job: the basic job type returned by coroutine builders like launch.
+	- Deferred: 
+		+ Is a non-blocking cancellable future, returned by async coroutine builders. And this is a Job with a result (which is different with normal job Type).
+	- SupervisorJob: 
+		+ A SupervisorJob is a special type of Job that changes the way of handling failure. A typical job would cancel all its children if it fails. However, a SupervisorJob allows its children to fail independently of each other.
+	- NonCancellable: 
+		+ A non-cancelable job that is always active. It is designed for withContext function to prevent cancellation of code blocks that need to be executed.
+	- CompletableJob:
+		+ A job that can be completed using complete() function. It is returned by Job() and SupervisorJob() constructor functions. 
+		+ All functions on this interface are thread-safe and can be safely invoked from concurrent coroutines without external synchronization.
+
+
+Type of Dispatcher
+	- Dispathcer.Main: 
+		+ This is main-thread
+	- Dispatchers.Default 
+		+ It uses a common pool of shared background threads, designed for computation-intensive work that consume CPU resources.
+	- Dispatchers.IO
+		+ Uses a shared pool of on-demand created threads, designed for handling IO-intensive blocking operations (like file I/O and blocking socket I/O).
+	- Dispatchers.Unconfined
+		+ Starts coroutine execution in the current call-frame (thread) until the first suspension. The coroutine will later resume in whatever thread used by the corresponding suspending function, without confining it to any specific thread or pool. 
+		+ The Unconfined dispatcher should not normally be used in code.
+
+Yield 
+	- Its purpose is to voluntarily give up the thread that the current coroutine is running on, allowing other coroutines that are ready to run to have a chance to execute.
+   		+ It sound like, it tell "I'm not doing anything critical right now", so if other coroutines need to do work, they can go ahead.
+
+StateFlow
+	- StateFlow is a Hot-Flow, collecting from StateFlow doesn't trigger any producer code.
+	- StateFlow require default value, and it will immediatly emit that default value if there is a collector.
+	- StateFlow only emit the distinct value, duplicated value will be ignored.
+	- When a new consumer starts collecting from the StateFlow, it receives the last state in the stream and any subsequent states.
+	- Warning: Never collect a flow from the UI directly, because this functions still running even the view is not visible on screen. This behavior can lead to app crashes. To avoid that, use the repeatOnLifecycle.
+
+SharedFlow
+	- A hot flow that emits values to all consumers that collect from it.
+	- SharedFlow is a highly-configurable generalization of StateFlow.
+	- It doesn't require default value.
+	- Able config how many item will be replay when a new consumer collect from it.
+
+Channel
+	- To talk and recieve data between multiple coroutines, this model also know as Communicating Sequential Processes.
+	- Channels in Kotlin are quite similar to Java’s BlockingQueue, but Channels suspend a coroutine rather than blocking a thread, making it a more efficient.
+Producer
+	- Similar as channel but when you simply want to send data from one coroutine only.
+	- For Producer, it produce launches coroutine and returns a channel, and the "send" func implicit inside producer.
+	- For lifecycle, we control when to close or cancel for "Channel", but Producer will handle by it own.
+Actors
+	- Just like Producer, the Actor function in Kotlin is another way to create a coroutine that’s tied to a channel.
+	- The key difference is that, with Actor, the channel goes into the coroutine, not out of it.
+	- With Actor, the channel and coroutine are encapsulated within a single entity, simplifying the architecture and use.
+		val actor = actor<Int> {
+		 	channel.consumeEach {
+		 		println(it)
+		 	}
+		}
+		(1..10).forEach {
+		 	actor.send(it)
+		}
+Buffered channels
+	- By defualt it is unbuffered channel, that mean the capacity is just one single element.
+	- With buffering enabled, the producer no longer waits for the consumer, it sends messages as quickly as it can, while the consumer continues to process them at its own speed.
+	- We should use buffered channel judiciously, because increasing the channel’s capacity also increases its memory footprint.
+
+Coroutines vs RxJava
+	1. Stable Api
+		- RxJava is stable, Coroutines are filled with APIs that are marked as experimental and may still change.
+	2. Debugging: 
+		- RxJava is difficult to debug, especially when we are sharing an observable with multiple streaming.
+	3. Performance:
+		- RxJava will have more operators in the stack traces, that mean it will consume more memory compare to Kotlin coroutines.
+	4. Simpler API:
+		- RxJava have different streaming types: Observable, Flowable, Maybe, Single, Completable.
+		- Kotlin coroutines can model the same stream with only Suspen and Flow.
+	5. Easier Back-Pressure Handling
+		- Back-pressure happens when the source of a stream emits items faster than the downstream can consume them.
+		- Kotlin Flow have transparency back-pressure management via suspending functions. When collector of the flow is overwhelmed, it can simply suspend the emitter and resume it later when it is ready to accept more elements.
+	6. Coroutines work on any Kotlin-supported platform, so if we ever want to share asynchronous code between Android and IOS we could do it with coroutines.
+	7. RxJava can be used with any Java-compatible language, where Kotlin coroutines can only be written in Kotlin.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
