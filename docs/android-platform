@@ -1,0 +1,86 @@
+## ART
+	- Android Runtime is the core component responsible for executing Android applications. It replaced Dalvik the original runtime, to enhance performance and battery.
+	- ART's beeing the bridges by translating DEX bytecode into machine code, this can be done by 2 ways:
+    + Ahead-of-Time Compilation: During app installation, ART converts the entire DEX bytecode into machine code. This improves app startup time and overall performance but increases installation time and storage use to store DEX bytecode.
+    + Just-in-Time Compilation: ART compiles bytecode into machine code during the app runtime. This saves storage space but can impact initial app performance.
+    + Machine Code: The CPU understands machine code, a low-level language specific to the hardware.
+    + Bytecode: Android apps are compiled into Dalvik Executable (DEX) bytecode, a compact format optimized for efficient execution.
+	- ART will balance between AOT and JIT: it dynamically adjusts based on factors like device performance, storage availability, and app usage patterns.
+
+## Just-in-time & Ahead-of-Time
+	- Interpretation and JIT compilation code runs slower than AOT, but takes less space on disk and in memory, which is why not all code should be AOT compiled.
+
+## Baseline Profile
+	- By the documation, Baseline Profiles improve code execution speed by about 30% from the first launch by avoiding interpretation and just-in-time compilation steps. That is optimization technique to improve app startup time and overall runtime performance.
+	- Understanding the Problem
+    + Traditionally, Android apps use a Just-In-Time compiler to translate bytecode into native machine code at runtime. While this is flexible, it can lead to performance overhead, especially during app startup.
+	- Baseline Profiles address this issue by
+    + Providing pre-compiled information about frequently used of code paths. This data is bundled with the app and used by the Android Runtime directly bypassing the JIT compilation process. This results in faster execution and improved performance.
+  - One thing we should take note, we need to run BaseLineProfile again for new release, because the code part is change, the old BaseLineProfile will not work well for it.
+
+## Dex Layout Optimization (Startup Profiles):
+	- This is a new feature helps improve app startup times. By placing frequently used of classes and methods at the beginning of the DEX file, specifically focusing on the code needed for initial startup. Android system can load them faster during app launch, reducing the time it takes for our app to be ready.
+	- Beside that, it could be reduce the memory as well. Depending on the code base, Dex Layout Optimization can potentially decrease the size of the primary Dex file, leading to slight reduction in memory.
+
+## Build time
+	- Modularization
+		+ ...
+	- For localization, config only default language for debug mode. Building resource also take time. Which internation application we support alot of languages, so ignore those language for debug mode, it could help a lot for build time.
+	- Conver all PNG images to vector images, to remove the optimization PNG process. 
+		+ And interm of performance, vector image is faster to load compare to PNG.
+		+ For app size, vector image only about 1KB, whereas PNG could be up to some MBs.
+	- Upgrade to lasted gradle version
+		+ Disable .PNG Image Optimize for debug mode, remove that compilation process time for debug mode.
+		+ R8 Compiler supported from AGP 3.4
+		+ ...
+	- Bazel vs K2 Compiler.
+	- Build on cloud with Manframer.
+
+## R8 Compiler
+	- When you build your project using Android Gradle plugin 3.4 or higher, the plugin no longer uses ProGuard to perform compile-time code optimization. Instead, the plugin works with the R8 compiler to handle the following compile-time tasks:
+    - Code shrinking, Resource shrinking, Obfuscation.
+    - Optimization: inspects and rewrites your code to improve runtime performance and further reduce the size of your app’s DEX files
+
+## App Startup
+	- App Startup: this is a google Api, they call App Startup. The App Startup provides a more performant way to initialize components at app startup and explicitly define their dependencies.
+		+ The idea is, we should only init components/dependencies which is must require for doing the job within startup flow. The rest should be init when it is about to use. 
+		+ We can do so with lazy init for both manually and dagger. Dagger also provide lazy provider for the dependency as well.
+		+ As I know Tiktok is using App Startup Api for their app.
+	- For Grab, because the app is supper app, there are bund of libraries and dependencies. So they split dagger component into 2 component. 
+		+ First component only contains the dependency which belong to startup flow, which we need to init it during the startup.
+		+ Second one is the application component, which contains the App Scope component. That component will be lazy init, the first feature need dependency from App Scope Component, the component will be inited.
+		+ And all of the dependencies within these 2 component are lazy provider. So we can imagin, when the first dependency needs to use then it will be init, and when the second dependency needs to use it will be inited. They are not init at the same time when we create dagger component.
+	- Use kotlin courountine to run the tasks concurrently.
+	- Balance between feature and Startup Time.
+
+## App performance (https://developer.android.com/topic/performance/overview)
+	- Profile our app first to see which component, which function have performance problem to resolve it. The idea is, firstly we should know which part of our app have performance issue. Don't just making the code change base on out feeling.
+	- Jank Stats library to monitor our app performance.
+	- Macrobenchmark for testing application startup and runtime performance.
+		+ Result also include the .trace file for us to analyze more detail.
+		+ Can config in CI.
+		+ To generate Baseline Profile.
+	- Microbenchmark to test smaller areas of code or library modules.
+
+## ANR
+	- ANR by accessing DB...
+	- Use Sqlite, MMKV, LevelDB
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

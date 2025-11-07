@@ -1,0 +1,55 @@
+## Jetpack Compose (https://developer.android.com/develop/ui/compose/side-effects)
+Recomposition:
+  - Recompose only the component need to be changed with new data.
+  - Example: .....
+
+Side-effect in compose
+  - By the documentation, a side-effect is a change to the state of the app that happens outside the scope of a composable function, or unpredictable of recompositions, or can be executing recompositions of composables in different orders.
+  - Ideally. Composables should be side-effect free, so we should use Side-Effect APIs so that those side effects are executed in a predictable manner.
+  - Side-Effects APIs:
+    - LaunchedEffect: to run a suspend function inside composable.
+      + The coroutine will be cancelled if LaunchedEffect leaves the composition.
+      + If LaunchedEffect is recomposed with different keys, the existing coroutine will be cancelled and the new suspend function will be launched in a new coroutine.
+    - ProduceState: convert non-Compose state into Compose state, e.g: observing a StateFlow in Composable.
+    - SnapshotFlow: convert Compose's State into a cold Flows.
+    - RememberCoroutineScope: obtain a composition-aware scope to launch a coroutine outside a Composable.
+    - DisposableEffect: to handle the effects that require to cleanup. So when Activity/Fragment distroy, we will release those resource.
+    - DerivedStateOf: to prevent unnecessary recomposition, that is when the inputs of a composable are changing more often than we need to recompose.
+
+State Hoisting:
+  - Moving the state to a composable's caller to make a composable stateless, and easy for reusing.
+  - The general pattern for state hoisting in Jetpack Compose is to replace the state variable with two parameters:
+    + value: T: the current value to display
+    + onValueChange: (T) -> Unit: an event that requests the value to change, where T is the proposed new value
+
+State Holder:
+ - The state-holders encapsulate state logic and data in a single class, making our composables cleaner and easier to understand. This is especially helpful for composables that have complex state or multiple effects.
+
+Adaptive Layout:
+  - Avoid using physical screen size, because foldable device could have more than one physical screen. And on tablet, the app could running in multiple-window mode, which mean the app may be splitting the screen with another app.
+  - Instead we should layout the UI base on actual portion of the screen, such as the current window metrics provided by the Jetpack WindowManager library.
+
+## Advance of Jetpack Compose
+  - Declarative: compose lets us describe our UI what it should look like, rather than think how to achieve it, this makes coding more concise and easy to understand.
+  - Performance: compose intelligently recomposes the UI only when the data is changes. This leads to performant and responsive applications.
+  - Scalability, reusability, maintainability: compose wrap the complex UI nested in side a compose functions, which promoting the reusability, and scalability. Also supported in code maintainable, as it is split up into small functions by functions.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

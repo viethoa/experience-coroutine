@@ -1,0 +1,61 @@
+##############################################
+##### Data structure
+List/Array
+  - Array is a collection of items stored at contiguous memory locations.
+  - Care about the order of item, and store duplicated value.
+  - Complexity:
+    + Add at bottom/Get by index: O(1)
+    + Remove/Contains/Insert at given index: O(n)
+Set
+  - Set is unordered, and doest not store duplicated value.
+  - Complexity: Add/Remove/Lookup: O(1) (Worse case O(log(n))).
+  - Stores only objects no such key value pairs maintained.
+  - Set internally uses Hashmap for its implementation.
+
+HashTable
+  - Hash Table is a type of Data Structure that is used to store the data in the form of “Key-Value” pair for fast access.
+  - In the average-case time complexity for lookups, insertions, and deletions is O(1).
+  - How it works: 
+    + That is about the Hash-Function, each key is passed through a hash function, which turns it into a unique index of an array. This index is called a hash code. The ideal hash function distributes keys uniformly across the array to minimize collisions.
+    + Second thing is about Array of Buckets: The hash table uses an array to store the key-value pairs, and each element in the array is called a bucket. In the ideal condition, a bucket only store a single key-value pair. So in average-case, the time complexity is O(1).
+    + In others, it might store a list of key-value pairs that is for the collision. So in that case, a search algorithm is used to find the matching key.
+  - Complexity: Insert/Delete/Lookup: O(1) (Worse case O(n)).
+
+HashMap
+  - It is similar to HashTable, there are 3 main things different.
+  - First, Thread Safety
+    + Hashtable: Thread-safe. This means multiple threads can access and modify a Hashtable concurrently without causing data corruption.
+    + HashMap: Non thread-safe. If multiple threads try to access and modify a HashMap concurrently, it can lead to unexpected behavior.
+  - Second, Null Values
+    + Hashtable: Does not allow null keys or values, attempting to add null will result in a NullPointerException.
+    + HashMap: Allows one null key and any number of null values.
+  - Performance:
+    + Hashtable: Slower due to synchronization overhead.
+    + HashMap: Faster because it's not synchronized.
+  - Complexity: Insert/Delete/Contains: O(1) (Worse case O(n)).
+
+Linked List (have Next and Previous): 
+  - A linked list is a linear data structure, in which the elements are not stored at contiguous memory locations. The elements in a linked list are linked using pointers.
+  - When to use linked list
+    + When you want quickly insearch/remove at back/front: O(1).
+    + Useful for implementation of stack and queue.
+  - Complexity
+    + Add/Remove at top: O(1), otherwise: O(n)
+    + Get/Search/contains: O(n)
+
+Stack: Last in First out
+Queue: First in First out
+MMap: ???
+
+Tree: 
+  - A Tree is a non-linear, hierarchical Data Structure that is used to store data in the form of nodes. A parent node can have no child or one child or more than one child. But the child node can’t have more than one parent.
+Binary Tree: 
+  - A Tree whose elements have at most 2 children is called a binary tree. Since each element in a binary tree can have only 2 children, we typically name them the left and right child.
+
+
+
+
+
+
+
+

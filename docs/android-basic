@@ -1,0 +1,211 @@
+##################################################
+## Android Terms
+CPU: central processing unit
+GPU: graphics processing unit
+RAM: random-access memory => short term memory where data is stored as the processor needs it.
+Kapt: (the Kotlin Annotation Processing Tool) 
+KSP: (Kotlin Symbol Processing)
+  - Is a Kotlin-first alternative to kapt. KSP analyzes Kotlin code directly, which is up to 2x faster. Kapt is now in maintenance mode.
+
+## Security Topics
+  - EncryptedSharedPreferences
+  - Rooted Device
+  - Https & SSL Pining
+  - E2EE (end to end encrypted)
+  - RASP (Runtime Application Self-Protection)
+  - Task hijacking in android
+  - OpenID Connect (OIDC)
+  - Do store any key in mobile, retrieve it from Server instead
+
+## Other knowledges
+  - onTrimMemory() => notify your app that memory is running low and the app may be killed
+  - Rotate Screen => Condition change, onDestroy will be called.
+
+## Android Process
+  - The Android system starts a new Linux process for the application with a single thread of execution. By default, all components of the same application run in the same process and thread (called the "main" thread).
+  - When the process is killed, all the components and the threads belong to this process will be destroyed as well.
+  - That is by the default configuration, we can config to run multiple processes for an application. For some companies, they are doing so to increase the memory limit set for a single process basic.
+    + Example, in my current company, when user launch short-video (equaly to fb-real, and tiktok). We wil launch it in new process, to save the memory for main-app and have more memory for short-video to load video, play video, and precache video.
+    + However, there is a disadvanceted, since the processes do not share memory, so we cannot share Singleton’s between multiple processes.
+  - Local vs Global process
+    + A global process can be shared between applications. Often a library will run on a global process so multiple applications can share the process to reduce memory usage.
+    + The type of the process is dependent on the value you enter in the process tag. If you start with a colon (“:”) then the process is a local one that is private to your application (full process name would be applicationId:processName). If you start with a lowercase letter then it is a global process.
+  - Example process:
+    + Foreground process
+    + Service process
+
+## Android Thread
+  - Main Thread 
+    + When an application is launched, the system creates a thread of execution for the application, called "main-thread." This thread is very important because it is in charge for dispatching events from user interation, including drawing events. It is also the thread to interacts with Android UI toolkit component.
+  - Worker threads
+    + A worker thread in Android is a background thread that is used to perform long-running or intensive tasks that should not block the main-thread. Because blocking the main-thread can cause the UI to become unresponsive and laggy.
+
+## Thread safe
+  - Thread-safety is referred to making sure our app behaves like expected when we are working with multiple threading. 
+  - There are some thing we need to take care, that is data inconsistent or corrupted, it could happen when one thread is modifying the data while another thread is reading it.
+  - There is a common issue when working with multiple threading, that is called Race condition.
+
+## Race condition
+  - Race condition occurs when two threads access a shared variable at the same time. The first thread reads the variable, and the second thread reads the same value from the variable. Then the first thread and second thread perform their own operations on the value. After that we will race to see which thread can write the value at last. 
+  - The one write the value at last will be preserved, the other will be overrided. In that case, data will be inconsistent, the business logic could not behave as expected, especially when we are working with Wallet and money transfer transaction. If the data is wrong, it will be the big problem.
+
+## Memory leak:
+  - By theory, memory leak happens when our code allocates memory for an object, but never deallocates that memory. There are some common example:
+  - Leaking Activities or Fragments
+    + This happens when our code holds a references to an Activities or Fragments that are no longer visible on the screen. So it will preventing garbage collection.
+    + For example: register a broadcast receivers without unregister it when Activity is destroy, it can lead to leak.
+  - Inner Classes
+    + If we have inner classes (non-static or anonymous) that hold references to their enclosing Activity or Fragment, it can cause a leak. This is because the inner class might outlive the outer class, keeping it from being garbage collected.
+  - Static Fields
+    + Using static fields to hold references to Views or Contexts can lead to leaks. Since static fields persist throughout the application's lifecycle, they can prevent the garbage collector from reclaiming the memory even when the context is no longer needed.
+
+## Out of memory
+  - By theory, if out app reaches the memory limit set for a single application and tries to allocate more memory, the system will throws an OutOfMemoryError exception. 
+    + For the memory limit, it's varies between devices based on how much RAM the device has available in overall.
+  - There are some common scenarios:
+    + Handle Large Objects (Excessive Memory Usage): If our app tries to handle massive amounts of data, like big images or complex calculations, it might exceed the memory limits set for a single application, that cause an out-of-memory.
+    + Memory leak: if our code have a lot of objects that no longer need, but the garbage collector can't reclaim the memory occupied by these unused objects, leading to depletion of available memory. So it will cause the out-of-memory in some situation.
+
+## ANR
+  - By theory, when our code blocking the main-thread about 5s, Android system will trigger an ANR. In that case, our app will be freezed and the UI is not responding.
+  - Example: there is a task on main-thread using application context for its business logic, but at the same time, some background tasks are accessing the application context as well. So the task of the main-thread needs to wait for background task releasing the application-context resource. And if the waiting time is taking too long, it will cause an ANR.
+  - When I was working on platform team, I have solved another situation, that is about reading SharedPrefs....
+
+## Stateful and Stateless
+  + Stateless: the object is mapped into memory only for the duration of operation, and the object's state is not maintained in memory after the operation completed.
+  + Stateful: the object is holding its state and may have nonpersistent data in memory that is required to maintain between operations of multiple-threading.
+
+## LruCache
+  - LruCache: a cache that holds strong references to a limited number of values.
+    + Each time a value is accessed, it is moved to the head of a queue.
+    + When a value is added to a full cache, the value at the end of the queue is evicted and could be eligible for garbage collection.
+  - LruCache internally use LinkedHashMap.
+  - DiskLruCache: it is LruCache with disk, not memory cache as Lrucache.
+
+## MediatorLiveData
+  - MediatorLiveData: allows us to merge multiple LiveData sources into one single LiveData which we then can observe.
+
+## LiveData
+  - Is an observable data holder class. Unlike a regular observable, LiveData is lifecycle-awareness, meaning it respects the lifecycle of app components, such as activities, fragments, or services. 
+  - This awareness ensures LiveData only notifies active observers about updates. Inactive observers won't be notified about the changes.
+    + To be in an active state if its lifecycle is in the STARTED or RESUMED state.
+    + Auto unregisters the consumer when View goes to the STOPPED state.
+  - Always up to date data
+    + If a lifecycle becomes inactive, it receives the latest data upon becoming active again. For example, an activity that was in the background receives the latest data right after it returns to the foreground.
+  - No memory leaks
+    + Observers are bound to Lifecycle objects and clean up themselves when their associated lifecycle is destroyed.
+  - No crashes due to stopped activities
+    + If the observer's lifecycle is inactive, such as in the case of an activity in the back stack, then it doesn’t receive any LiveData events.
+
+## RxJava
+  1. Single Observable: only emits one value or an exception.
+  2. Maybe Observable: either emits one value, no value (completed will be called) or an exception.
+  3. Observable: non-backpressured, In ReactiveX an observer subscribes to an Observable. Then that observer reacts to whatever item or sequence of items the Observable emits.
+  4. Completable: represents a deferred computation without any value but only indication for completion or exception.
+  5. Flowable: 
+  6. Hot and Cold Observable
+    - An Observable is cold when data is produced inside the Observable.
+    - An Observable is hot when the data is produced outside the Observable.
+    - The main difference is that a cold observable creates a data producer for each subscriber, whereas a hot observable creates a data producer first, and each subscriber gets the data from same producer.
+  7. CompositeDisposable
+    - Clear(): dispose all Disposable have been added into the resources, and clear the resource list. But not dispose the CompositeDisposable.
+    - Dispose(): Same action as clear but dispose the CompositeDisposable. After disposed, if new disposable is added it will be dispose immediately rather than adding into the resources.
+
+## Android Reference
+  - Strong reference: strong references are the ordinary references, anytime we create a new object, a strong reference is by default created.
+    + Example: val myObject = MyObject()
+  - Weak reference: a reference objects, which do not prevent their referents from being made finalizable.
+  - Soft reference: as a stronger than WeakReference, whereas a WeakReference will be collected immediately, a SoftReference will beg into the Garbage Collector to stay in memory unless there is no other option.
+    + This makes a SoftReference very useful for the implementation of a cache.
+  - Phantom reference: which are enqueued after the collector determines that their referents may otherwise be reclaimed (can be collected whenever the Garbage Collector wants).
+  - Androidx vs Android: AndroidX is a major improvement to the original Android Support Library which is no longer maintained. Androidx packages fully replace the Support Library by providing feature parity and new libraries.
+
+## Implicit Intent & Explicit Intent
+  - Explicit: for launching a specific Activity.
+  - Implicit: for launch Action View: Share, Open Browser.
+
+## Hashing vs Encryption
+  - Encryption is two-way, the data can be decrypted so it is readable again. Hashing, on the other hand, is one-way, meaning the plaintext is scrambled into a unique digest, through the use of a salt, that cannot be decrypted.
+
+## Serializable and Parcelable
+  - Serializable is a Java interface that enables an object to be serialized, meaning that it can be converted into a Byte-Stream and stored in a file or transmitted over the network.
+  - Parcelable is an Android-specific interface that enables an object to be passed as a parameter from one activity to another.
+
+## WorkManager
+- The primary recommended API for background processing. Especially for persistent work, so when user device is restart or reboots, the schedule still remains.
+- With WorkeManager, it will try do our background work as soon as it can.
+- We can config WorkManager with variety of situations such as 
+  + Network connection: only run if device is connected to network.
+  + Battery: we can config to not run the work when low battery.
+- Other the benefits:
+  + Support for both asynchronous one-off and periodic tasks.
+  + Support Chain, so output from one work request used as input for the next.
+  + LiveData support to easily display work request state in UI.
+  + Following system health best practices.
+  + Can cancel the work
+  + Support for constraints such as network conditions, storage space, and charging status.
+- Setting
+  + OneTimeWorkRequest: only execute once.
+  + PeriodicWorkRequest: will repeat on a cycle.
+- Work State
+  + BLOCKED, CANCELLED, ENQUEUED, FAILED, RUNNING or SUCCEEDED.
+- Periodic Work: run periodically once every interval period and guaranteed to run exactly one time during this interval. It may run immediately, at the end of the period, or any time in between so long as the other conditions are satisfied at the time.
+
+## Launch Activity Mode
+- Standard: 
+  + It creates a new instance of an activity in the task from which it was started. Multiple instances of the activity can be created and multiple instances can be added to the same or different tasks.
+  + Example: 
+  + Before launch B: A -> B -> C -> D
+  + After launch B: A -> B -> C -> D -> B
+- Single Top: 
+  + If an instance of activity already exists at the top of the current task, a new instance will not be created and Android system will route the intent information through onNewIntent().
+  + Example:
+    - Before launch D: A -> B -> C -> D
+    - After launch D: A -> B -> C -> D (onNewIntent() will be called)
+  + If an instance is not present on top of task then new instance will be created.
+  + Example: 
+    - Before launch D: A -> B -> C
+    - After launch D: A -> B -> C -> D
+- Single Task: 
+  + In this launch mode a new task will always be created and a new instance will be pushed to the task as the root one. At any one time, there will be just one instance of the activity.
+  + Example:
+    - Before launch D: A -> B -> C
+    - After launch D: A -> B -> C -> D (launch as usual)
+  + If the activity already exists on another task, no new instance is created, and the Android system transmits the intent information via the onNewIntent() function.
+  + Example:
+    - Before launch B: A -> B -> C
+    - After launch B: A -> B
+- Single Instance: 
+  + This is a highly unique start option that is only used in programs with a single activity. It works similarly to Single Task, except that no additional activities are generated in the same task. Any further activity initiated from this point will result in the creation of a new task.
+  + Example: 
+    - A -> B -> C — Job #1
+    - D — Job #2 (Here, D will be assigned to a separate duty)
+- Clear Task Flag: 
+  + Any existing task that would be associated with the activity to be cleared before the activity is started. The activity becomes the new root, old activities are finished.
+  + 1 Backstack have multiple tasks, 1 Task have multiple Activities. No define, will be only 1 task inside the backstack.
+  + Example:
+    - Backstack: [task 1:[A -> B -> C], task 2: [D -> E]]
+    - Launch B with clear-task: [task 2:[D -> E], task 1: [A -> B]]
+- Clear Top Flag:
+  + If set, and the activity being launched is already running in the current task, then instead of launching a new instance of that activity, all of the other activities on top of it will be closed and this Intent will be delivered to the (now on top) old activity as a new Intent.
+  + Example
+    - A -> B -> C -> D -> E => luanch C with clear-top: A -> B -> C 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

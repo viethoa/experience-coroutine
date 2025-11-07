@@ -1,0 +1,74 @@
+##########################################
+## MVVM Architecture
+- The concept of MVVM architecture is, ViewModel is not holding any reference of the View. Instead, ViewModel will expose data property for the View to observe and update the view base on that data. When the data is changed, the View will be changed accordingly.
+	+ It decoupling the ViewModel with the UI, increasing the maintianability and easier for writing unit test. 
+	+ Also, in the UI side, by observing the data within lifecycle, we can prevent the crash by updating the View when it is no longer visbile on screen.
+	+ In the future, if we want to redesign the UI, or changing UI framework. In the ideal situation, we dont need to touch ViewModel code.
+- Solving the drawback of MVP
+	+ In MVP, the Presenter and View are tightly coupled. This means they directly reference each other, making the code harder to maintain and test.
+	+ And in the Presenter, if we are not using WeekReference to hold the View's reference. In case the Presenter is live longer than the View, it will preventing the garbage collection, so it will cause a memory leak.
+- Cons
+	+ If we are using MVVM with databinding, it is a common technique, but it will increasing the build time. And databinding also allow us to write the logic inside the .xml, which is not able to test, and the code could be mess.
+	+ For the big and complex Activity/Fragment, the logic of ViewModel will be big as well. In that case, the maintainability of ViewModel will be reduced, so the complexity of the screen is directly effected the maintainability. So when we implement a big and complex UI, we should consider to use MVVM.
+- Why DataBinding increase the build-time:
+	+ Because data binding involves an additional processing step during the build process.
+	+ In the .xml, they include special syntax of (@{ }) to bind the data & events into the View. To understand these layouts, Android Studio needs to generate extra boilerplate code during the build process. This generation is takes time.
+	+ The process name is ":app:dataBindingProcessLayoutsDebug" if I am not remember wrong.
+
+## Clean Architecture
+- Clean architecture is focus on creating a flexible and maintainable codebase, also promote the modularization approach to the development.
+	+ Different parts of the application should have clear responsibilities and be independent of each others.
+- Clean architecture is organized by layer, we will have 3 kind of layers: Data Layer, Domain Layer, and Presentation Layer.
+	+ With Clean Architecture, the business logic will be moved out from Presentation Layer into Domain Layer which's can be easy to reused in any place in the application.
+	+ The ViewModel now only contain the logic of controlling the UI, it will be easier for maintaining.
+- Cons
+ 	+ For small projects, the benefits of Clean Architecture might be outweighed. Because, clean architecture introduces some complexity in terms of setting up the layers to make it clear & separation modules and abstractions class between layers. While for small project can be easier to done in other simple architectures such as MVVM.
+ 	+ Adding more effort in learning curve for new member which is not using Clean Architecture before.
+
+## MVP
+- The main goal of MVP is to separate the different aspects of an application into different parts. There will be 3 main parts.
+	+ The Model is mainly for data management.
+	+ The View is all about the user interface, it displays the data provided by the Model and sends user interactions to Presenter.
+	+ The Presenter play as an intermediary between the Model and the View. It fetches data from the model, formats it for the view, and handle user interactions. It essentially controls what the user sees on the screen.
+- In MVP, the Presenter and View are tightly coupled, they directly reference to each other. And the concept of updating the UI within lifecycle is not yet have.
+- Another drawback is, holding the reference of the View inside Presenter also potential of memory leak. It will preventing garbege collection when the Activity/Fragment are longer visibile on screen.
+
+##########################################
+## Modularization
+- Modularization is popular for big and complex application, it bring several benifits to Android development. Such as
+- Enhanced the code reusability, scalability, and maintainablity.
+	+ Code within modules can be reused across different parts of our application, and we can even copy to another app to use.
+	+ Breaking the codebase down into smaller and self-contained module, makes it easier to understand, modify, and maintaining.
+	+ And it also support to reduces the code duplication as well.
+	+ For scalability, we can imagine it's like the lego, we can easy to inject/un-inject feature module base on our need. And each module can be developed and maintained independently, allowing for better team collaboration.
+- Support the build-time:
+	+ When we make the change in only a child module, so only the affected modules need to be recompiled. This can significantly reduce build times.
+- Support Play Feature Delivery (Dynamic Feature):
+	+ Just for the context, Play Feature Delivery uses advanced capabilities of app bundles, allowing certain features to be delivered conditionally or downloaded by on-demand.
+	+ And Play Feature Delivery only possible with a modularized codebase, we need to move that features into a seperated module.
+- Way to modular (by layer + by vertical team):
+	+ Presentation Layer modules
+		- One Activity/Fragment into one module.
+	+ Domain Layer modules
+		- One module for implementation, one module for interface, data class and data mapper class.
+	+ Data Layer modules
+		- Same thing here, one module for the implementation and one module for interface and data class.
+	+ System Design modules
+		- A CustomView potential of reusing accross application into a single module.
+	+ Platform modules
+		- Networking, storage, permission manager, location manager, common utilities.
+	+ Verticcal Team's modules
+		- Module own/manage by vertical team
+
+
+
+
+
+
+
+
+
+
+
+
+
