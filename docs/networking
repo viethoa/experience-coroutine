@@ -1,0 +1,89 @@
+##############################################
+Http (Hypertext Transfer Protocol) vs Https (Hypertext Transfer Protocol Secure)
+	- Http is sending data in plain text directly to server, which can be easy to intercept the request. This is why it's not an ideal protocol for sending sensitive data through the internet.
+	- Https is a secure version of Http. It adds a layer of encryption using TLS (Transport Layer Security) to scramble the data before it's sent between the client and server. This encryption protects sensitive information from being intercepted by unauthorized users.
+	- Handshake
+		+ Client requests the certificate from the server.
+		+ The server sends the certificate, which contains the public key.
+		+ Client verifies the certificate with a trusted third party called a Certificate Authority (CA).
+		+ If the certificate is valid, client creates a secret session key and encrypts it with the server's public key.
+		+ The server decrypts the session key with its private key, and both parties can now use the session key to encrypt all communication.
+
+SSL Pinning
+	- SSL Pinning adds an extra layer of security into the process. There are 2 techniques:
+		+ Certificate SSL pinning: we hard-coding the SSL certificate of a server into the client’s application. The client then compares the server’s certificate with the hard-coded certificate and only allows communication if they are match.
+		+ Public key pinning: hard-coding the public key of the server’s SSL certificate instead of the entire certificate. The client then checks that the server presents a certificate containing the same public key that was hard-coded in the client side. This method ensures that even if the server’s certificate changes, the client still trusts the server as long as the public key remains the same.
+	- Types of SSL Pinning
+		+ Static SSL Pinning: the certificate or public key is hardcoded in the application. If the server’s certificate or public key changes user need to update the app.
+		+ Dynamic SSL Pinning: the application does not hardcode the certificate or public key. Instead, it retrieves the certificate or public key from the server during the initial handshake and then caches it locally for future connections.
+	- Handshake
+		+ The client (such as a mobile app) establishes an SSL/TLS connection with the server.
+		+ The server sends its public key, which is used to encrypt the data exchanged between the client and the server.
+		+ The client verifies the server’s identity by checking the server’s digital certificate issued by a trusted Certificate Authority (CA).
+		+ With SSL pinning, the client also checks that the server’s public key matches the hard-coded public key into the client’s code or configuration. If the public keys match, the connection is allowed to proceed.
+		+ If the server’s public key does not match the pinned key, the client assumes that a MITM attack is underway and terminates the connection.
+	- SSL Pinning is a powerful tool but needs careful implementation to balance between security and usability.
+
+TCP (Transmission Control Protocol)
+	- TCP is a transport protocol that ensure reliable transmission of packets.
+	- TCP includes mechanisms to solve many of problems of the packet-based messaging, such as lost packets, out of order packets, duplication packets, and corrupted packets.
+  - For TCP, when we are sending packet of data over TCP, the recipient must always acknowledge what they received.
+  - TCP using timer to detecting package lost:
+    + After sending off a packet, the sender starts a timer and puts the packet in a retransmission queue. If the timer runs out and the sender haven't yet received an ACK from the recipient, it sends the packet again.
+    + The retransmission may lead to the recipient receiving duplicated packets, if a packet was not actually lost but just very slow to arrive or be acknowledged. If so, the recipient can simply discard duplicated packets. The idea is, it's better to have the data twice than not at all.
+  - Establish connectoin
+  	+ TCP needs to establishe the connection first before doing data exchange between sender and reciever.
+    + Open connection: Syn (computer one) > Ack Syn (computor 2) > Ack (Computor 1)
+  	+ Close connection: Fin (Finish) > Ack Fin > Ack
+  - Package format
+  	+ Checksum
+    + Sequence number & Acknowledge number
+      - Those two numbers help the computers to keep track of which data was successfully received, which data was lost, and which data was accidentally sent twice.
+      - Also help to handling out of order packets.
+    + Urgent pointer
+    + Window size
+    + Source port number & Destination port number
+  - Header is bigger then UDP, and can range in size from 20 to 60 bytes.
+
+UDP (User Datagram Protocal)
+	- UDP is a lightweight data transport protocol (that works on top of IP).
+  - UDP provides a mechanism to detect corrupt data in packets, but it does not attempt to solve other problems such as package lost or out of order package.
+  	+ For packet corruption, UDP use the Checksum to detect that, and when the reciver see the packet is corrupted, it just discard the package entirely.
+  - That's why UDP is sometimes known as the Unreliable Data Protocol. But the advance of UDP is, it is simple and fast.
+  - UDP is often used for Time-Sensitive Applications, such as real-time video streaming where the speed is more important than the accuracy.
+  - Segment format
+  	+ Each UDP segment contains an 8-byte header and variable length data.
+    + Source port number & Destination port number
+    + Segment lenght: Thus, the maximum length of a UDP segment is 65,535 bytes.
+
+Socket
+	- Socket is a standardized way to connect and exchange information across the network, it is a two-way connection the data can be sent and received between applications. We have some types of Socket:
+	- Stream socket
+		+ Stream socket provides a reliable, ordered, data exchanging between applications on the network. 
+		+ It's often refered as a Connection-Oriented Sockets, because the connection needs to be established between the sender and receiver before any data can be exchanged.
+		+ Typically, Stream socket implemented using TCP (#STCP) to ensure data arrives correctly in the order it was sent.
+	- Datagram Socket
+		+ Also know as Connectionless Socket, which's using UDP. Each packet sent or received on a datagram socket is individually addressed and routed.
+		+ The order of the package and reliability are not guaranteed with datagram sockets, so multiple packets sent from one machine to another may arrive in any order or might not arrive at all.
+		+ But the advance is, it's simple and fast. It's suitable for the case where reliability isn't critical, and where the speed is higher priority.
+	- Raw Socket:
+		+ It is a special type of Socket, allow direct sending and receiving of packets without any protocol-specific or transport layer formatting.
+	- Websocket 
+		+ WebSocket is a two-way communication between client and server, it also build on top of TCP which ensures reliable data delivery.
+	- We can run multiple Sockets at a same times.
+	- Socket vs HTTPs:
+		+ Sockets are typically used for more advanced scenarios where we need more control over the communication between sender and reciver.
+		+ Let think about the real-time tracking data senario, like OKX, we need to show real time update for pricing. So Socket should be best suitable for it, rather than keep pulling data from server continouesly using HTTPs without knowing of wherether the data has been changed or not.
+		+ Cons:
+			+ The connection is persisted, it can add some overhead compared to HTTPs (message-based protocols) where connections are established only for data exchange, after that it will be closed.
+			+ And to settle and manage stream sockets will require more effort compared to HTTPs message-based protocols.
+		+ HTTPs
+			- It is like on-demand data exchange, it doesn't require to keep the conection, once the request is done, the connection will be close.
+			- We can think as stateless and stateful, where scoket need to manage the connection...
+
+
+
+
+
+
+

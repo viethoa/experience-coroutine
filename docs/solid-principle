@@ -1,0 +1,76 @@
+##############################################
+## SOLID Principle
+
+1: Single responsible
+- A class should have a single responsibility, only one reason to be changed.
+- Example: A class to handle User Validation and Sending User Email should not be the same. 
+  + User Validation and EmailManager
+
+2: Open-closed
+- Class should be Open for extension but closed for modification. Modifying the existing code could be cause potention of new bug.
+- Example: let say we have a Shape class with a base function of calculate its area. So it should be open for Circle, Square class to extend and do them own calculation for it own area.
+
+3: Liskov Substitution
+- Subtypes should be substitutable for their base types.
+- This principle aims to enforce consistency so that the parent Class or its child Class can be used in the same way.
+- Example:
+    + A Square class should be substitutable for a Rectangle class. So any code that works with a Rectangle object should also work with a Square object. Such as the function to calculate perimeter.
+
+4: Interface Segregation
+- A specific interfaces are better than one general-purpose interface.
+- Example: 
+  + The Repository could be one of the example, like we have UserRepository Interface & BookingRepository Interface is better then just one general Repository Interface. So when we want to handle User Data, we don't need to implement all of the methods in the general-purpose of Repository Interface.
+
+5: Dependency inversion
+- It refers to the decoupling of software modules. So High-level modules should not depend on low-level modules, both should depend on the abstraction.
+- Example: 
+  + Domain Layer & Data Layer, both should depend on abstraction.
+
+## DRY - "Don't Repeat Yourself," 
+- Is a core software development practice that emphasizes minimizing code duplication
+
+## KISS - "Keep It Simple, Stupid"
+- Is a design principle that emphasizes simplicity in systems and products. It encourages developers to avoid unnecessary complexity and instead write code that is straightforward and easy to understand.
+
+## Singleton
+- When to use
+  + The Singleton pattern is meant for specific scenarios where you genuinely need a single & global point of access. And creation of second instance can be dangerous, for example Camera instance.
+- Pros
+  + Memory Efficiency: since there's only one instance, singletons can be memory-efficient compared to creating multiple objects of the same class.
+  + Global access point: singletons provide a single, easy-to-find point of access for a shared resource. This can simplify code that needs to interact with that resource.
+  + Enforce Singleton instance: can prevent accidental creation of duplicates, it's kind of the missed usage.
+- Cons
+  + Increase complexity: by using singleton pattern, we have to deal with technical challenges for ensuring thread-safety. In case, improper synchronization can lead to race conditions or data corruption.
+  + Overuse: memory consuming, it only use for period of time but keep in memory through out application lifecycle. So it will be come unused object but occupied in memory.
+- Implementation:
+  1. Multithread Supported
+  class Foo { 
+    private Helper helper = null;
+    public synchronized Helper getHelper() {
+      if (helper == null) {
+        helper = new Helper();
+      }
+      return helper;
+    }
+  }
+  2. Broken multithread by "Double-Checked Locking"
+  class Foo { 
+    private Helper helper = null;
+    public Helper getHelper() {
+      if (helper == null) {
+        synchronized(this) {
+          if (helper == null) {
+            helper = new Helper();
+          }
+        }
+      }
+      return helper;
+    }
+  }
+
+
+
+
+
+
+
