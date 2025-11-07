@@ -1,0 +1,344 @@
+#####################################################################################
+## What do you understand by Kotlin?
+- Kotlin is an open-source programming language that includes concepts from Object-Oriented Programming. 
+- It is JVM-based and also can be compiled with other LLVM (Low Level Virtual Machine).
+- It is commonly used to create Android Apps, server-side apps, and Multiple Platform application.
+- Kotlin have the properties like Range Expression, Extension Function, Companion Object, Smart casts, and Data classes as Kotlin Language bonus.
+
+## Compare Java and Kotlin
+- Kotlin
+  + Use a very modern approach to the syntax aim to reduce the boilerplate code without effecting the performance.
+  + Kotlin support functional programing concept and provides powerful language features like lambda expressions, higher-order functions.
+  + Support extension function, which let us add new functions to existing classes without modifying the source code or inheriting them.
+  + Kotlin has native support for coroutines, which is a way to write asynchronous code in a sequential manner.
+## Feature of Kotlin not present in Java?
+- Coroutines & Flow
+- Null Safety
+- Extension Funtion
+- Data Class
+- Compainion Objects
+- Smart Casts
+
+## Smart Casts
+- Kotlin smart casts are a feature that allows the compiler to automatically cast variables to a more specific type based on the context in which they are used.
+- Example:
+	+ if (object is ChildClass) { ... }
+
+## Describe what is an object class and abstract class.
+- Abstract Class
+	+ An Abstract Class is a class that cannot be instantiated directly. It is meant to be subclassed and extended by other classes.
+	+ Abstract class can contain both abstract methods and concrete methods. Abstract method is a method that doesn't have an implementation in the abstract class. It must be overridden by all subclasses.
+	+ Abstract classes are useful for defining common interfaces and implementations for related classes.
+- Object Class
+	+ The object keyword is used to declare singleton objects, that can only have one instance. They are often used to implement global variables and constants, or to provide a central point of access to shared resources.
+	+ Objects can have method and can implement the interface. 
+    + It's usefull for stateless implementation.
+
+## About Kotlin Range Expressions
+- It is a concise and convenient way to create and manipulate sequences of values.
+- Example:
+	+ For (i int 0..10)
+	+ for (i int 0 until 10) (excludes 10)
+	+ for (i in 8 downTo 0 step 2) // 86420
+
+## What is Extension Function?
+- We can create an extension function of existing classes in Kotlin without inheriting them.
+- Compile...
+- Example: 
+	+ fun String.isNotNullOrEmpty(): Boolean { ... }
+
+## What is Kotlin Null Safety?
+- Null safety in Kotlin is help to removing the risk of a null reference in the code (NullPointerException if no comply). 
+- Example:
+	+ var myVariable: Int? = null
+	+ myVariable?.toString()
+
+## How many contructor are there in Kotlin?
+- In Kotlin, there are two types of constructors:
+	+ Primary Constructor: it is a simple way to initialize a class
+		- Example: 
+			+ User(val id: Int) { ... }
+	+ Secondary Constructor: enable us to add further initalization logic
+		- Example: 
+			+ Class User {
+				constructor(name: String, id: Int) { ... }
+			}
+- The relationship between Primary and Secondary constructors is:
+	+ The primary constructor initializes the class, while the secondary constructor is used to initialize the class and introduce some extra logic.
+	+ One must explicitly invoke the primary constructor while using secondary constructor.
+
+## What is the critical difference between 'var' and 'val' for Variable declaration in Kotlin?
+- We use 'var' for mutable variable, and 'val' for immutable variable.
+
+## What is the key difference between 'val' and 'const' for Variable declaration in Kotlin?
+- Both are immutable.
+- The value of the 'const' variable must be know at compile-time, whereas we can assign the value of 'val' at any time (can be runtime also).
+
+## What is the key difference between 'fold' and 'reduce' in Kotlin?
+- 'Fold' is a function that takes an initial value. The lamda will be called for the first time with parameter initial value and first element of the collection.
+	+ Example:
+		- listOf(1, 2, 3).fold(0) { accumulator, element -> accumulator + element }
+- 'Reduce' is not require a starting value. Instead, it starts with the initial element of the collection.
+	+ Example:
+		- listOf(1, 2, 3).reduce { accumulator, next -> accumulator + next } // 6
+- Addition: 'reduce' and 'fold' functions are a powerful Api for reducing collections to a single value.
+
+## Compare in Kotlin
+- "==" for comparing the value
+- "===" for comparing the reference
+- Compare two strings: "==" / equals() / compareTo()
+- No Ternary operator in Kotlin (Ternary is one line replacement of if-else condition): 
+	+ Ternay in Java: val a = (true) ? expression-1 : expression-2
+
+## Elvis Operator in Kotlin
+- Example: val length = myString?.lenght ?: 0
+
+## @JvmStatic, @JvmOverloads, and @JvmFiled in Kotlin
+- @JvmStatic: this annotation informs the compiler that the method is a static method called from Java code.
+- @JvmField: we need to use the JvmField in Kotlin code to access that fields in Java code without requiring any getters or setters.
+- @JvmOverloads: the JvmOverloads annotation is used to utilize the default values passed for argument in Kotlin code from Java code.
+
+## Primitive type int, double, float in Kotlin
+- We cannot primitive types directly in Kotlin. Instead we use object wrapper such as Int, Double, Float, etc.
+
+## Companion Object in Kotlin
+- Companion Object is similar to the static method in Java. The variable and method can be accessed from outside by the class name.
+- A companion object is always declared inside of a class.
+
+## String Interpolation
+- print(“This is kotlin interpolation $<variable>”)
+
+## Different between laterinit and lazy?
+- Lazy
+    - Can only initialize once
+    - Must use lambda to initialize it
+    - Only use for immutable Val
+- Lateinit
+    - Only use for mutable Var
+    - Can be initialize multiple times
+    - It's possible to initialize the object from any position.
+    - We need to make sure the variable is initialized before we use it.
+
+## Data Class
+- Main purpose is for holding data.
+- The primary constructor needs to have at least one parameter.
+- Data classes cannot be abstract, open, sealed, or inner.
+- Compiler automatically generate all properties in the primary contructor for equals(), hashCode(), and toString().
+- For property declared in the class body
+  + The compiler only uses the properties defined inside the primary constructor for the automatically generated functions. To exclude a property from the generated implementations, declare it inside the class body
+    data class Person(val name: String) {
+        var age: Int = 0
+    }
+- Support Destructuring declarations (ComponentN Funcs)
+  + val (name, age) = person
+- It’s recommended to use val parameters in a data classes constructor in order to use immutable properties of an instances. Immutable objects are easier while working with multi-threaded applications.
+- Immutable objects are useful in multithreaded applications because they can be safely accessed by several threads concurrently, without the need for locking or other synchronization.
+
+## Delegation
+- The Delegation pattern has proven to be a good alternative of inheritance, and Kotlin supports it natively requiring zero boilerplate code. So now, instead of taking a multiple levels of inheritance which is a little complecated, we can just use delegation.
+- Note: overriding a member of an interface implemented by delegation
+  + The compiler will use our override implementations instead of those in the delegate object
+
+## Single abstract method (SAM)
+- An interface with only one abstract method that help to make our code more concise and readable by using lambda expressions.
+- Need to define the "fun" keyword for the interface class
+- To declare a functional interface in Kotlin, use the fun modifier:
+    fun interface IntPredicate {
+        fun accept(i: Int): Boolean
+    }
+    + By leveraging Kotlin's SAM, you can write the following equivalent code instead
+        val isEven = IntPredicate { it % 2 == 0 }
+    + If you don't use a SAM, you will need to write code like this
+        val isEven = object : IntPredicate {
+            override fun accept(i: Int): Boolean {
+                return i % 2 == 0
+            }
+        }
+
+## Sealed Classes/Interface & Declaration-site Variance
+- Sealed Classes and Interfaces represent for a restricted class hierarchies.
+	+ Sealed Class
+    	- The sealed class cannot be extended, and all direct subclasses are known at compile time.
+    	- No other subclasses may appear outside the module and package within the sealed class is defined.
+	+ Sealed Interface
+        - The implementation need to be in the same package and module.
+
+## What are the benefits of Sealed class over Enum? 
+- We can simply add many custom constructors/functions into the sealed class depending on our needs. Enum is not that flexible.
+
+## Declaration-site Variance & Reified:
+- Out: You can think of class C as being a producer of T, and NOT a consumer of T.
+    + Example of Out
+        interface Source<out T> {
+            fun next(): T
+        }
+- In: it can only be consumed and never produced.
+    + Example of In
+        interface Comparable<in T> {
+            operator fun compareTo(other: T): Int
+        }
+- Reified: Sometimes we need to access the type of the generic parameter.
+    + Normal functions (not marked as inline) cannot have reified parameters.
+    + Example:
+        inline fun <reified T> TreeNode.findParentOfType(): T? {
+            var p = parent
+            while (p != null && p !is T) {
+                p = p.parent
+            }
+            return p as T?
+        }
+
+## Lambda Expression, HOF, Inline, noinline, crossinline (https://viblo.asia/p/inline-noinline-va-crossinline-trong-kotlin-la-gi-yMnKMwwrl7P)
+- Lambda Expression
+  + If a function without name is called anonymous function. For lambda expression we can say that it is anonymous function.
+  + Example: 
+    + val sum = { x: Int, y: Int -> x + y }
+  + Trailing Lambda: if the last parameter of a function is a function, then a lambda expression passed as the corresponding argument can be placed outside the parentheses
+    * Example: 
+      - fun myFunction(value: Int, operation: () -> Unit) { ... }
+      - val result = myFunction(1) { <do something> }
+
+- Higher-order function (HOF): is a function that does at least one of the following:
+  + Takes one or more functions as arguments.
+  + Returns a function as its result.
+  + Example:
+    - fun myFunction(value: Int, operation: () -> Unit) { ... }
+    - fun createMultiplier(factor: Int): (Int) -> Int { return { number -> number * factor }}
+
+- Inline: if a function have inline keyword, the compiler doesn't allocate any memory for this function, instead the compiler copies the piece of code virtually at the calling place at runtime.
+  + Inline function is to reduce the memory overhead of some situation when we use Higher-order Functions or Lambda expression.
+  + When to use:
+    * We can use an inline function when we need to prevent "object creation" and have better control flow.
+    * Or for a short function which use in multiple places.
+  + We should not turn a huge function to be "inline" because it will downgrade the performance of the application.
+  	* When a function is inlined, its code is essentially copied into every location where it's called. This can significantly increase the overall size of the compiled code, especially for large functions.
+    * Larger code size can negatively impact performance due to:
+		+ Increased memory usage for storing the code
+		+ Potential slowdowns in instruction fetching and decoding
+			* When a function is called multiple times, its instructions can be cached in the CPU's for faster execution.
+			* However, with inlining, the instructions is scattered across different parts of the code, potentially leading to more cache misses and slower execution.
+
+- No-inline: example
+	+ This is used to specify whether or not a lamba expressions should be inlined in the call.
+	+ If we don't want all of the lambdas passed to an inline function to be inlined, just mark it with noinline keyword.
+    inline fun doSomething(
+        firstFunction: () -> Unit,
+        noinline secondFunction: () -> Unit
+    ) {
+        firstFunction()
+        secondFunction()
+    }
+
+- Crossinline: example
+    + Prevents non-local returns in the specified lambda parameter.
+    fun firstFunction() {
+        print("Start First Function")
+        secondFunction {
+            print("Do second task")
+            return
+        }
+        print("End first function")
+    }
+    inline fun secondFunction(abc: () -> Unit) {
+        abc()
+    }
+    
+    + Decompile code, System.out.print("End first function") is not there, because there is a return in secondFunction
+    public void doSomething() {
+        System.out.print("Start First Function");
+        System.out.print("Do second task");
+    }
+    + To prevent that let use Crossinline, then cannot add return into secondFunction
+    inline fun secondFunction(crossinline abc: () -> Unit) {
+        abc()
+    }
+
+## Volatile (for variable) & @Synchronized (for function)
+- The volatile keyword signals that a variable is subject to concurrent access and modification by multiple threads.
+- When a variable is marked as volatile, it ensures that every read and write operation on that variable happens directly in the main memory. Which guarantees immediate visibility of the variable’s changes to all threads.
+- Thereby enhancing its thread safety by ensuring that threads always access the most current state of the variable.
+
+## Pure Function
+- A pure function should return the same result for the same input.
+- And a pure function is one that has no side effects.
+    + In this context, a side effect refers to any action that modifies or accesses the external state
+    + The external state could be a non-local variable included Closeure
+
+## Closures
+- The caching of state ("i") is store inside the function
+    fun counter(): () -> Int {
+        var i = 0
+        return { i++ }
+    }
+    val next = counter()
+    println(next())
+    println(next())
+
+## tailrec (Tail Recursion)
+- Need to avoid stackoverflow when using recursion, Kotlin supports an optimization called tail recursion.
+- Kotlin compiler sees a tailrec function, it transforms the recursive calls into a loop during compilation.
+- Only support single recursion.
+    tailrec fun sumRec(i: Int, sum: Long, numbers: List<Int>): Long {
+        return if (i == numbers.size) {
+            return sum
+        } else {
+            sumRec(i+1, numbers[i] + sum, numbers)
+        }
+    }
+
+## Currying
+- Currying is a technique that transforms a function accepting multiple arguments into a sequence of functions, each taking just one argument.
+    fun subtract(x: Int, y: Int): Int {
+        return x - y
+    }
+    fun subtract(x: Int): (Int) -> Int {
+        return fun(y: Int): Int {
+            return x - y
+        }
+    }
+    fun subtract(x: Int) = { y: Int -> x - y }
+    println(subtract(50)(8)) // 42
+
+## Memoization
+- If our function always returns the same output for the same input, we can easily map its input to the output, caching the results in the process and avoid recomputation.
+
+## Keyword "use" in Kotlin
+- It's an extension function defined for Closeable objects.
+- Guarantees that the resource will be closed automatically, even if an exception occurs during the period of usage.
+- Helps prevent resource leaks which cause the potential errors and memory leak.
+- How does it work: when the code block is finished, whether normally or with an exception, USE calls close() on the resource.
+- Example: 
+    URL("https://example.com")
+        .openStream()
+        .use { stream ->
+            val text = stream.bufferedReader().use { it.readText() }
+            println(text)
+        } // Stream is automatically closed here
+
+## What is the difference between a "when" expression and an "if" statement in Kotlin?
+- "When" expression
+    + A when expression in Kotlin must include conditions for all possible values, so if the expression does not match any of condition, the "else" block is executed.
+    + "When" should be easier for code reading
+- "If" statement
+    + Use to run block of code if the condition is matched, and it doesn't require "else".
+- "If" expression
+    + Use to check for one single condition and with "else" block if the condition not match.
+
+## Function vs Method
+- Function
+    + A reusable block of code that can perform a specific task.
+    + Can be called from anywhere in the application.
+    + Cannot access object/class data.
+- Method
+    + A function that is attached to an class/object.
+    + Can only be called on instances of the class in which they are defined.
+    + Can access the object's data and other methods of its parent class.
+
+
+
+
+
+
+
+
+
